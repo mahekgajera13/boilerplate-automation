@@ -1,0 +1,25 @@
+{
+  "name": "playwright-cucumber-boilerplate",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "clean": "if exist allure-results rd /s /q allure-results && if exist allure-report rd /s /q allure-report && if exist test-videos rd /s /q test-videos && if exist testmo-report.xml del testmo-report.xml",
+    "test": "npm run clean && cucumber-js",
+    "test:zephyr": "npm run clean && set ZEPHYR_AUTH_TOKEN=YOUR_TOKEN && set PROJECT_KEY=YOUR_PROJECT_KEY && cucumber-js --format playwright-zephyr/lib/src/cucumber",
+    "test:testmo": "npm run clean && cucumber-js --format junit:testmo-report.xml && testmo automation:run:submit --instance YOUR_INSTANCE_URL --project-id YOUR_PROJECT_ID --name \"Playwright Test Run\" --results testmo-report.xml --token YOUR_TESTMO_TOKEN",
+    "report": "allure generate allure-results --clean && allure open"
+  },
+  "devDependencies": {
+    "@cucumber/cucumber": "^12.1.0",
+    "@playwright/test": "^1.54.2",
+    "@types/chai": "^5.2.2",
+    "@types/node": "^24.2.1",
+    "allure-commandline": "^2.34.1",
+    "allure-cucumberjs": "^3.3.3",
+    "chai": "^5.2.1",
+    "playwright": "^1.54.2",
+    "playwright-zephyr": "^1.1.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.2"
+  }
+}
