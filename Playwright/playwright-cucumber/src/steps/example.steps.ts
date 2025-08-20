@@ -1,7 +1,6 @@
-// src/steps/example.steps.ts
 
 import { Given, Then } from "@cucumber/cucumber";
-import { page } from "../support/hooks"; // hooks.ts માંથી 'page' ઓબ્જેક્ટને import કરો
+import { page } from "../support/hooks"; 
 
 Given("I open the Google homepage", async function () {
   await page.goto("https://www.google.com");

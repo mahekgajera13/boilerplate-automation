@@ -1,0 +1,43 @@
+# Dependencies
+node_modules/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+*.log
+logs/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Build outputs / temp
+build/
+dist/
+out/
+tmp/
+temp/
+
+# Coverage
+coverage/
+.nyc_output/
+
+# Cypress artifacts
+cypress/videos/
+cypress/screenshots/
+cypress/downloads/
+
+# Allure artifacts
+allure-results/
+allure-report/
+.allure/
+
+# Editor/OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
+.cache/

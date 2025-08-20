@@ -1,0 +1,169 @@
+name: E2E (Cypress + Allure)
+
+on:
+  schedule:
+    - cron: "0 9 * * *"
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: "Branch to run tests from (optional)"
+        required: false
+        default: "main"
+      featureFile:
+        description: "Select feature file to run"
+        required: true
+        default: "all"
+        type: choice
+        options:
+          - all
+          - homepage
+      browserType:
+        description: "Select browser type"
+        required: true
+        default: "chrome"
+        type: choice
+        options:
+          - chrome
+          - msedge
+          - electron
+          - firefox
+
+permissions:
+  contents: write
+
+jobs:
+  run-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch || 'main' }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Setup Java (for Allure CLI)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Verify Cypress
+        run: npx cypress verify
+
+      - name: Debug input values
+        run: |
+          echo "Branch: ${{ inputs.branch || 'main' }}"
+          echo "Feature File: ${{ inputs.featureFile }}"
+          echo "Browser: ${{ inputs.browserType }}"
+      - name: Run Cypress with Allure
+        shell: bash
+        env:
+          INPUT_FEATURE: ${{ inputs.featureFile }}
+          INPUT_BROWSER: ${{ inputs.browserType }}
+        run: |
+          SPEC_ARG=""
+          if [ "$INPUT_FEATURE" != "all" ]; then
+            SPEC_PATH="cypress/e2e/features/${INPUT_FEATURE}.feature"
+            if [ ! -f "$SPEC_PATH" ]; then
+              echo "Spec $SPEC_PATH not found. Falling back to homepage.feature"
+              SPEC_PATH="cypress/e2e/features/homepage.feature"
+            fi
+            SPEC_ARG="--spec \"$SPEC_PATH\""
+          fi
+          BROWSER_ARG=""
+          if [ -n "$INPUT_BROWSER" ]; then
+            BROWSER_ARG="--browser $INPUT_BROWSER"
+          fi
+          echo "Running: npx cypress run $BROWSER_ARG --env allure=true $SPEC_ARG"
+          eval npx cypress run $BROWSER_ARG --env allure=true $SPEC_ARG
+      - name: Generate Allure report
+        if: always()
+        run: npx allure generate --clean ./allure-results -o ./allure-report
+
+      - name: Upload Allure results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-results
+          path: allure-results
+          if-no-files-found: warn
+
+      - name: Upload Allure report (HTML)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-report
+          path: allure-report
+          if-no-files-found: ignore
+
+      - name: Upload Cypress videos
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-videos
+          path: cypress/videos
+          if-no-files-found: ignore
+
+      - name: Upload Cypress screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-screenshots
+          path: cypress/screenshots
+          if-no-files-found: ignore
+
+  deploy-report:
+    needs: run-tests
+    runs-on: ubuntu-latest
+    env:
+      GH_PAGE_TOKEN: ${{ secrets.GH_PAGE_TOKEN }}
+
+    steps:
+      - name: Short-circuit if token missing
+        if: env.GH_PAGE_TOKEN == ''
+        run: |
+          echo "GH_PAGE_TOKEN not set; skipping Pages publish. You can still download the 'allure-report' artifact." \
+          && echo "Set repo secret GH_PAGE_TOKEN (with repo scope) to publish and get a live link."
+      - name: Checkout repository
+        if: env.GH_PAGE_TOKEN != ''
+        uses: actions/checkout@v4
+
+      - name: Download Allure report artifact
+        if: env.GH_PAGE_TOKEN != ''
+        uses: actions/download-artifact@v4
+        with:
+          name: allure-report
+          path: ./allure-report
+
+      - name: Deploy Allure HTML to GitHub Pages (gh-pages)
+        if: env.GH_PAGE_TOKEN != ''
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          personal_token: ${{ env.GH_PAGE_TOKEN }}
+          publish_dir: ./allure-report
+
+      - name: Set and show report URL
+        if: env.GH_PAGE_TOKEN != ''
+        id: seturl
+        run: |
+          REPORT_URL="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/"
+          echo "report_url=$REPORT_URL" >> $GITHUB_OUTPUT
+          echo "Allure report: $REPORT_URL" >> $GITHUB_STEP_SUMMARY
+          echo "$REPORT_URL" > allure-report-url.txt
+      - name: Upload Report URL as Artifact
+        if: env.GH_PAGE_TOKEN != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-report-link
+          path: allure-report-url.txt
