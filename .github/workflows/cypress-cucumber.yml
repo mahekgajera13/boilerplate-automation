@@ -21,6 +21,9 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -31,16 +34,12 @@ jobs:
           node-version: ${{ github.event.inputs.node || '20' }}
 
       - name: Install dependencies
-        shell: bash
-        run: |
-          cd "$GITHUB_WORKSPACE/Cypress/Cypress + Cucumber"
-          npm ci
+        run: npm ci
+        working-directory: "Cypress/Cypress + Cucumber"
 
       - name: Run Cypress (with Allure)
-        shell: bash
-        run: |
-          cd "$GITHUB_WORKSPACE/Cypress/Cypress + Cucumber"
-          npm run cy:run:allure
+        run: npm run cy:run:allure
+        working-directory: "Cypress/Cypress + Cucumber"
 
       - name: Upload allure-results (raw)
         if: always()
@@ -52,10 +51,8 @@ jobs:
 
       - name: Generate Allure report
         if: always()
-        shell: bash
-        run: |
-          cd "$GITHUB_WORKSPACE/Cypress/Cypress + Cucumber"
-          npx allure generate --clean ./allure-results -o ./allure-report
+        run: npx allure generate --clean ./allure-results -o ./allure-report
+        working-directory: "Cypress/Cypress + Cucumber"
 
       - name: Upload Allure HTML report
         if: always()

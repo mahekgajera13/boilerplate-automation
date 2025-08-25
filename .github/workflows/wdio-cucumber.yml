@@ -21,6 +21,9 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -31,16 +34,12 @@ jobs:
           node-version: ${{ github.event.inputs.node || '20' }}
 
       - name: Install dependencies
-        shell: bash
-        run: |
-          cd "$GITHUB_WORKSPACE/WebdriverIO/WDIO + Cucumber"
-          npm ci
+        run: npm ci
+        working-directory: "WebdriverIO/WDIO + Cucumber"
 
       - name: Run WDIO tests (Cucumber)
-        shell: bash
-        run: |
-          cd "$GITHUB_WORKSPACE/WebdriverIO/WDIO + Cucumber"
-          npx wdio run wdio.conf.ts
+        run: npx wdio run wdio.conf.ts
+        working-directory: "WebdriverIO/WDIO + Cucumber"
 
       - name: Upload allure-results (raw)
         if: always()
@@ -52,10 +51,8 @@ jobs:
 
       - name: Generate Allure report
         if: always()
-        shell: bash
-        run: |
-          cd "$GITHUB_WORKSPACE/WebdriverIO/WDIO + Cucumber"
-          npx allure generate --clean ./allure-results -o ./allure-report
+        run: npx allure generate --clean ./allure-results -o ./allure-report
+        working-directory: "WebdriverIO/WDIO + Cucumber"
 
       - name: Upload Allure HTML report
         if: always()
