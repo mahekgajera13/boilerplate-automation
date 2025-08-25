@@ -1,28 +1,56 @@
-name: CI
+name: Manual Test Runner
 
 on:
   workflow_dispatch:
-  push:
-    branches: [ main, master ]
-  pull_request:
+    inputs:
+      project:
+        description: "Select which project to run"
+        required: true
+        type: choice
+        options:
+          - cypress-cucumber
+          - cypress-mocha
+      node:
+        description: "Node.js version"
+        default: "18"
+        required: true
+        type: string
 
 jobs:
-  verify-repo:
+  run-selected:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Show repository structure
-        run: |
-          pwd
-          ls -la
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ github.event.inputs.node }}
 
-      # NOTE: Add your real install/test steps below when ready
-      # - uses: actions/setup-node@v4
-      #   with:
-      #     node-version: 18
-      # - run: npm ci --workspaces=false
-      # - run: npm test
+      - name: Show selection
+        run: |
+          echo "Project: ${{ github.event.inputs.project }}"
+          echo "Node:    ${{ github.event.inputs.node }}"
+
+      - name: Install deps (Cypress + Cucumber)
+        if: ${{ github.event.inputs.project == 'cypress-cucumber' }}
+        run: npm ci
+        working-directory: "Cypress/Cypress + Cucumber"
+
+      - name: Run tests (Cypress + Cucumber)
+        if: ${{ github.event.inputs.project == 'cypress-cucumber' }}
+        run: npx cypress run
+        working-directory: "Cypress/Cypress + Cucumber"
+
+      - name: Install deps (Cypress + Mocha)
+        if: ${{ github.event.inputs.project == 'cypress-mocha' }}
+        run: npm ci
+        working-directory: "Cypress/Cypress + Mocha"
+
+      - name: Run tests (Cypress + Mocha)
+        if: ${{ github.event.inputs.project == 'cypress-mocha' }}
+        run: npx cypress run
+        working-directory: "Cypress/Cypress + Mocha"
 
 
