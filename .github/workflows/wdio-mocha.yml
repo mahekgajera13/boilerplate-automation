@@ -37,7 +37,7 @@ jobs:
         run: npm ci
 
       - name: Run WDIO tests (Mocha)
-        run: npx wdio run wdio.conf.ts
+        run: cd "WebdriverIO/WDIO + Mocha" && npx wdio run wdio.conf.ts
 
       - name: Upload allure-results (raw)
         if: always()
@@ -49,8 +49,7 @@ jobs:
 
       - name: Generate Allure report
         if: always()
-        run: npx allure generate --clean ./allure-results -o ./allure-report
-        working-directory: "WebdriverIO/WDIO + Mocha"
+        run: cd "WebdriverIO/WDIO + Mocha" && npx allure generate --clean ./allure-results -o ./allure-report
 
       - name: Upload Allure HTML report
         if: always()
