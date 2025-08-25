@@ -1,0 +1,66 @@
+name: Cypress + Cucumber
+
+on:
+  workflow_dispatch:
+    inputs:
+      node:
+        description: "Node.js version"
+        default: "18"
+        required: true
+        type: string
+  push:
+    branches: [ main, master ]
+    paths:
+      - 'Cypress/Cypress + Cucumber/**'
+      - '.github/workflows/cypress-cucumber.yml'
+  pull_request:
+    paths:
+      - 'Cypress/Cypress + Cucumber/**'
+      - '.github/workflows/cypress-cucumber.yml'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: "Cypress/Cypress + Cucumber"
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ github.event.inputs.node || '18' }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Cypress (with Allure)
+        run: npm run cy:run:allure
+
+      - name: Upload allure-results (raw)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-cucumber-allure-results
+          path: Cypress/Cypress + Cucumber/allure-results
+          if-no-files-found: ignore
+
+      - name: Generate Allure report
+        if: always()
+        uses: simple-elf/allure-report-action@v1.7
+        with:
+          allure_results: Cypress/Cypress + Cucumber/allure-results
+          allure_report: Cypress/Cypress + Cucumber/allure-report
+          keep_reports: 20
+
+      - name: Upload Allure HTML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-cucumber-allure-report
+          path: Cypress/Cypress + Cucumber/allure-report
+          if-no-files-found: ignore
+
+

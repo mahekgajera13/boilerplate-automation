@@ -1,0 +1,66 @@
+name: Playwright Native
+
+on:
+  workflow_dispatch:
+    inputs:
+      node:
+        description: "Node.js version"
+        default: "18"
+        required: true
+        type: string
+  push:
+    branches: [ main, master ]
+    paths:
+      - 'Playwright/playwright-native/**'
+      - '.github/workflows/playwright-native.yml'
+  pull_request:
+    paths:
+      - 'Playwright/playwright-native/**'
+      - '.github/workflows/playwright-native.yml'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: "Playwright/playwright-native"
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ github.event.inputs.node || '18' }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests (Playwright)
+        run: npm test
+
+      - name: Upload allure-results (raw)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pw-native-allure-results
+          path: Playwright/playwright-native/allure-results
+          if-no-files-found: ignore
+
+      - name: Generate Allure report
+        if: always()
+        uses: simple-elf/allure-report-action@v1.7
+        with:
+          allure_results: Playwright/playwright-native/allure-results
+          allure_report: Playwright/playwright-native/allure-report
+          keep_reports: 20
+
+      - name: Upload Allure HTML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pw-native-allure-report
+          path: Playwright/playwright-native/allure-report
+          if-no-files-found: ignore
+
+

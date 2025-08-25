@@ -1,0 +1,66 @@
+name: WDIO + Mocha
+
+on:
+  workflow_dispatch:
+    inputs:
+      node:
+        description: "Node.js version"
+        default: "18"
+        required: true
+        type: string
+  push:
+    branches: [ main, master ]
+    paths:
+      - 'WebdriverIO/WDIO + Mocha/**'
+      - '.github/workflows/wdio-mocha.yml'
+  pull_request:
+    paths:
+      - 'WebdriverIO/WDIO + Mocha/**'
+      - '.github/workflows/wdio-mocha.yml'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: "WebdriverIO/WDIO + Mocha"
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ github.event.inputs.node || '18' }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run WDIO tests (Mocha)
+        run: npx wdio run wdio.conf.ts
+
+      - name: Upload allure-results (raw)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wdio-mocha-allure-results
+          path: WebdriverIO/WDIO + Mocha/allure-results
+          if-no-files-found: ignore
+
+      - name: Generate Allure report
+        if: always()
+        uses: simple-elf/allure-report-action@v1.7
+        with:
+          allure_results: WebdriverIO/WDIO + Mocha/allure-results
+          allure_report: WebdriverIO/WDIO + Mocha/allure-report
+          keep_reports: 20
+
+      - name: Upload Allure HTML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wdio-mocha-allure-report
+          path: WebdriverIO/WDIO + Mocha/allure-report
+          if-no-files-found: ignore
+
+
