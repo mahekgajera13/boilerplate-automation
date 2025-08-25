@@ -1,10 +1,9 @@
 {
   "name": "playwright-mocha-allure",
   "version": "1.0.0",
-  "type": "module",
   "private": true,
   "scripts": {
-  "test": "mocha --loader ts-node/esm --extension ts \"test/**/*.spec.ts\"",
+  "test": "mocha --require ts-node/register --extension ts \"test/**/*.spec.ts\"",
   "allure:generate": "allure generate allure-results --clean -o allure-report",
   "allure:open": "allure open allure-report"
 },
