@@ -2,14 +2,8 @@ name: Playwright + Mocha
 
 on:
   workflow_dispatch:
-    inputs:
-      node:
-        description: "Node.js version"
-        default: "18"
-        required: true
-        type: string
   push:
-    branches: [ main, master ]
+    branches: main
     paths:
       - 'Playwright/playwright-mocha/**'
       - '.github/workflows/playwright-mocha.yml'
@@ -31,7 +25,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ github.event.inputs.node || '20' }}
+          node-version: 20
 
       - name: Install dependencies
         run: npm ci
@@ -62,5 +56,3 @@ jobs:
           name: pw-mocha-allure-report
           path: Playwright/playwright-mocha/allure-report
           if-no-files-found: ignore
-
-
