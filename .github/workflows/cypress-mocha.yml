@@ -21,9 +21,6 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: "Cypress/Cypress + Mocha"
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -34,29 +31,38 @@ jobs:
           node-version: ${{ github.event.inputs.node || '20' }}
 
       - name: Install dependencies
-        run: npm ci
+        shell: bash
+        run: |
+          cd "$GITHUB_WORKSPACE/Cypress/Cypress + Mocha"
+          npm ci
 
       - name: Run Cypress (with Allure)
-        run: npm run cy:run
+        shell: bash
+        run: |
+          cd "$GITHUB_WORKSPACE/Cypress/Cypress + Mocha"
+          npm run cy:run
 
       - name: Upload allure-results (raw)
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: cypress-mocha-allure-results
-          path: Cypress/Cypress + Mocha/allure-results
+          path: "Cypress/Cypress + Mocha/allure-results"
           if-no-files-found: ignore
 
       - name: Generate Allure report
         if: always()
-        run: npx allure generate --clean ./allure-results -o ./allure-report
+        shell: bash
+        run: |
+          cd "$GITHUB_WORKSPACE/Cypress/Cypress + Mocha"
+          npx allure generate --clean ./allure-results -o ./allure-report
 
       - name: Upload Allure HTML report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: cypress-mocha-allure-report
-          path: Cypress/Cypress + Mocha/allure-report
+          path: "Cypress/Cypress + Mocha/allure-report"
           if-no-files-found: ignore
 
 

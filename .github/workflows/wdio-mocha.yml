@@ -21,9 +21,6 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: "WebdriverIO/WDIO + Mocha"
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -34,29 +31,38 @@ jobs:
           node-version: ${{ github.event.inputs.node || '20' }}
 
       - name: Install dependencies
-        run: npm ci
+        shell: bash
+        run: |
+          cd "$GITHUB_WORKSPACE/WebdriverIO/WDIO + Mocha"
+          npm ci
 
       - name: Run WDIO tests (Mocha)
-        run: npx wdio run wdio.conf.ts
+        shell: bash
+        run: |
+          cd "$GITHUB_WORKSPACE/WebdriverIO/WDIO + Mocha"
+          npx wdio run wdio.conf.ts
 
       - name: Upload allure-results (raw)
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: wdio-mocha-allure-results
-          path: WebdriverIO/WDIO + Mocha/allure-results
+          path: "WebdriverIO/WDIO + Mocha/allure-results"
           if-no-files-found: ignore
 
       - name: Generate Allure report
         if: always()
-        run: npx allure generate --clean ./allure-results -o ./allure-report
+        shell: bash
+        run: |
+          cd "$GITHUB_WORKSPACE/WebdriverIO/WDIO + Mocha"
+          npx allure generate --clean ./allure-results -o ./allure-report
 
       - name: Upload Allure HTML report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: wdio-mocha-allure-report
-          path: WebdriverIO/WDIO + Mocha/allure-report
+          path: "WebdriverIO/WDIO + Mocha/allure-report"
           if-no-files-found: ignore
 
 
