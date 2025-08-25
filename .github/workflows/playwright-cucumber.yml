@@ -34,7 +34,7 @@ jobs:
           node-version: ${{ github.event.inputs.node || '20' }}
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci || npm install
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
@@ -54,7 +54,7 @@ jobs:
 
       - name: Generate Allure report
         if: always()
-        run: npx allure generate --clean ./allure-results -o ./allure-report
+        run: npx --no-install allure generate --clean ./allure-results -o ./allure-report
         working-directory: Playwright/playwright-cucumber
 
       - name: Upload Allure HTML report

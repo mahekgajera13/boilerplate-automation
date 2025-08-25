@@ -34,7 +34,7 @@ jobs:
           node-version: ${{ github.event.inputs.node || '20' }}
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci || npm install
         working-directory: WebdriverIO/WDIO-cucumber
 
       - name: Run WDIO tests (Cucumber)
@@ -51,7 +51,7 @@ jobs:
 
       - name: Generate Allure report
         if: always()
-        run: npx allure generate --clean ./allure-results -o ./allure-report
+        run: npx --no-install allure generate --clean ./allure-results -o ./allure-report
         working-directory: WebdriverIO/WDIO-cucumber
 
       - name: Upload Allure HTML report

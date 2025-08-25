@@ -34,7 +34,7 @@ jobs:
           node-version: ${{ github.event.inputs.node || '20' }}
 
       - name: Install dependencies
-        run: npm --prefix "WebdriverIO/WDIO-mocha" ci
+        run: npm --prefix "WebdriverIO/WDIO-mocha" ci || npm --prefix "WebdriverIO/WDIO-mocha" install
 
       - name: Run WDIO tests (Mocha)
         run: npx --prefix "WebdriverIO/WDIO-mocha" wdio run "WebdriverIO/WDIO-mocha/wdio.conf.ts"
@@ -49,7 +49,7 @@ jobs:
 
       - name: Generate Allure report
         if: always()
-        run: npx --prefix "WebdriverIO/WDIO-mocha" allure generate --clean "WebdriverIO/WDIO-mocha/allure-results" -o "WebdriverIO/WDIO-mocha/allure-report"
+        run: npx --no-install --prefix "WebdriverIO/WDIO-mocha" allure generate --clean "WebdriverIO/WDIO-mocha/allure-results" -o "WebdriverIO/WDIO-mocha/allure-report"
 
       - name: Upload Allure HTML report
         if: always()
