@@ -39,8 +39,11 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
 
+      - name: Build TypeScript tests
+        run: npx tsc -p tsconfig.json
+
       - name: Run tests (Mocha)
-        run: xvfb-run -a npm test
+        run: xvfb-run -a npx mocha "dist/test/**/*.spec.js"
 
       - name: Upload allure-results (raw)
         if: always()
