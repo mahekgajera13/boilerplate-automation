@@ -40,7 +40,7 @@ jobs:
         run: npx playwright install --with-deps
 
       - name: Run tests (Mocha)
-        run: xvfb-run -a node --loader ts-node/esm ./node_modules/mocha/bin/mocha.js "test/**/*.spec.ts"
+        run: xvfb-run -a npm test
 
       - name: Upload allure-results (raw)
         if: always()
