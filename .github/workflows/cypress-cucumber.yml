@@ -31,7 +31,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ github.event.inputs.node || '18' }}
+          node-version: ${{ github.event.inputs.node || '20' }}
 
       - name: Install dependencies
         run: npm ci
@@ -49,11 +49,8 @@ jobs:
 
       - name: Generate Allure report
         if: always()
-        uses: simple-elf/allure-report-action@v1.7
-        with:
-          allure_results: Cypress/Cypress + Cucumber/allure-results
-          allure_report: Cypress/Cypress + Cucumber/allure-report
-          keep_reports: 20
+        run: npx allure generate --clean ./allure-results -o ./allure-report
+        working-directory: "Cypress/Cypress + Cucumber"
 
       - name: Upload Allure HTML report
         if: always()
