@@ -40,7 +40,7 @@ jobs:
         run: npx playwright install --with-deps
 
       - name: Run tests (Mocha)
-        run: npx mocha -r ts-node/register --extension ts "test/**/*.spec.ts"
+        run: xvfb-run -a npx mocha -r ts-node/register --extension ts "test/**/*.spec.ts"
 
       - name: Upload allure-results (raw)
         if: always()
