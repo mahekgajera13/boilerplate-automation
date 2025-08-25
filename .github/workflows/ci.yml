@@ -1,0 +1,28 @@
+name: CI
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main, master ]
+  pull_request:
+
+jobs:
+  verify-repo:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Show repository structure
+        run: |
+          pwd
+          ls -la
+
+      # NOTE: Add your real install/test steps below when ready
+      # - uses: actions/setup-node@v4
+      #   with:
+      #     node-version: 18
+      # - run: npm ci --workspaces=false
+      # - run: npm test
+
+
