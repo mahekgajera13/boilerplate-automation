@@ -11,11 +11,11 @@ on:
   push:
     branches: [ main, master ]
     paths:
-      - 'WebdriverIO/WDIO + Mocha/**'
+      - 'WebdriverIO/WDIO-mocha/**'
       - '.github/workflows/wdio-mocha.yml'
   pull_request:
     paths:
-      - 'WebdriverIO/WDIO + Mocha/**'
+      - 'WebdriverIO/WDIO-mocha/**'
       - '.github/workflows/wdio-mocha.yml'
 
 jobs:
@@ -34,29 +34,29 @@ jobs:
           node-version: ${{ github.event.inputs.node || '20' }}
 
       - name: Install dependencies
-        run: npm --prefix "WebdriverIO/WDIO + Mocha" ci
+        run: npm --prefix "WebdriverIO/WDIO-mocha" ci
 
       - name: Run WDIO tests (Mocha)
-        run: npx --prefix "WebdriverIO/WDIO + Mocha" wdio run "WebdriverIO/WDIO + Mocha/wdio.conf.ts"
+        run: npx --prefix "WebdriverIO/WDIO-mocha" wdio run "WebdriverIO/WDIO-mocha/wdio.conf.ts"
 
       - name: Upload allure-results (raw)
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: wdio-mocha-allure-results
-          path: "WebdriverIO/WDIO + Mocha/allure-results"
+          path: "WebdriverIO/WDIO-mocha/allure-results"
           if-no-files-found: ignore
 
       - name: Generate Allure report
         if: always()
-        run: npx --prefix "WebdriverIO/WDIO + Mocha" allure generate --clean "WebdriverIO/WDIO + Mocha/allure-results" -o "WebdriverIO/WDIO + Mocha/allure-report"
+        run: npx --prefix "WebdriverIO/WDIO-mocha" allure generate --clean "WebdriverIO/WDIO-mocha/allure-results" -o "WebdriverIO/WDIO-mocha/allure-report"
 
       - name: Upload Allure HTML report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: wdio-mocha-allure-report
-          path: "WebdriverIO/WDIO + Mocha/allure-report"
+          path: "WebdriverIO/WDIO-mocha/allure-report"
           if-no-files-found: ignore
 
 

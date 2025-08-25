@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "wdio": "wdio run ./wdio.conf.ts",
-    "allure:generate": "npx allure generate allure-results --clean",
-    "allure:open": "npx allure open"
+    "allure:generate": "allure generate --clean allure-results -o allure-report",
+    "allure:open": "allure open allure-report"
   },
   "keywords": [],
   "author": "",

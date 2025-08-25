@@ -11,11 +11,11 @@ on:
   push:
     branches: [ main, master ]
     paths:
-      - 'Cypress/Cypress + Cucumber/**'
+      - 'Cypress/Cypress-cucumber/**'
       - '.github/workflows/cypress-cucumber.yml'
   pull_request:
     paths:
-      - 'Cypress/Cypress + Cucumber/**'
+      - 'Cypress/Cypress-cucumber/**'
       - '.github/workflows/cypress-cucumber.yml'
 
 jobs:
@@ -34,29 +34,29 @@ jobs:
           node-version: ${{ github.event.inputs.node || '20' }}
 
       - name: Install dependencies
-        run: npm --prefix "Cypress/Cypress + Cucumber" ci
+        run: npm --prefix "Cypress/Cypress-cucumber" ci
 
       - name: Run Cypress (with Allure)
-        run: npm --prefix "Cypress/Cypress + Cucumber" run cy:run:allure
+        run: npm --prefix "Cypress/Cypress-cucumber" run cy:run:allure
 
       - name: Upload allure-results (raw)
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: cypress-cucumber-allure-results
-          path: "Cypress/Cypress + Cucumber/allure-results"
+          path: "Cypress/Cypress-cucumber/allure-results"
           if-no-files-found: ignore
 
       - name: Generate Allure report
         if: always()
-        run: npx --prefix "Cypress/Cypress + Cucumber" allure generate --clean "Cypress/Cypress + Cucumber/allure-results" -o "Cypress/Cypress + Cucumber/allure-report"
+        run: npx --prefix "Cypress/Cypress-cucumber" allure generate --clean "Cypress/Cypress-cucumber/allure-results" -o "Cypress/Cypress-cucumber/allure-report"
 
       - name: Upload Allure HTML report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: cypress-cucumber-allure-report
-          path: "Cypress/Cypress + Cucumber/allure-report"
+          path: "Cypress/Cypress-cucumber/allure-report"
           if-no-files-found: ignore
 
 

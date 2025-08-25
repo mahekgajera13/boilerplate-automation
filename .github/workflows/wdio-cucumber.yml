@@ -11,11 +11,11 @@ on:
   push:
     branches: [ main, master ]
     paths:
-      - 'WebdriverIO/WDIO + Cucumber/**'
+      - 'WebdriverIO/WDIO-cucumber/**'
       - '.github/workflows/wdio-cucumber.yml'
   pull_request:
     paths:
-      - 'WebdriverIO/WDIO + Cucumber/**'
+      - 'WebdriverIO/WDIO-cucumber/**'
       - '.github/workflows/wdio-cucumber.yml'
 
 jobs:
@@ -34,29 +34,29 @@ jobs:
           node-version: ${{ github.event.inputs.node || '20' }}
 
       - name: Install dependencies
-        run: npm --prefix "WebdriverIO/WDIO + Cucumber" ci
+        run: npm --prefix "WebdriverIO/WDIO-cucumber" ci
 
       - name: Run WDIO tests (Cucumber)
-        run: npx --prefix "WebdriverIO/WDIO + Cucumber" wdio run "WebdriverIO/WDIO + Cucumber/wdio.conf.ts"
+        run: npx --prefix "WebdriverIO/WDIO-cucumber" wdio run "WebdriverIO/WDIO-cucumber/wdio.conf.ts"
 
       - name: Upload allure-results (raw)
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: wdio-cucumber-allure-results
-          path: "WebdriverIO/WDIO + Cucumber/allure-results"
+          path: "WebdriverIO/WDIO-cucumber/allure-results"
           if-no-files-found: ignore
 
       - name: Generate Allure report
         if: always()
-        run: npx --prefix "WebdriverIO/WDIO + Cucumber" allure generate --clean "WebdriverIO/WDIO + Cucumber/allure-results" -o "WebdriverIO/WDIO + Cucumber/allure-report"
+        run: npx --prefix "WebdriverIO/WDIO-cucumber" allure generate --clean "WebdriverIO/WDIO-cucumber/allure-results" -o "WebdriverIO/WDIO-cucumber/allure-report"
 
       - name: Upload Allure HTML report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: wdio-cucumber-allure-report
-          path: "WebdriverIO/WDIO + Cucumber/allure-report"
+          path: "WebdriverIO/WDIO-cucumber/allure-report"
           if-no-files-found: ignore
 
 
