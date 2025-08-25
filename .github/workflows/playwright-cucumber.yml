@@ -5,7 +5,7 @@ on:
     inputs:
       node:
         description: "Node.js version"
-        default: "18"
+        default: "20"
         required: true
         type: string
   push:
