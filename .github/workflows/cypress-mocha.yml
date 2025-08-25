@@ -34,12 +34,10 @@ jobs:
           node-version: ${{ github.event.inputs.node || '20' }}
 
       - name: Install dependencies
-        run: npm ci
-        working-directory: "Cypress/Cypress + Mocha"
+        run: npm --prefix "Cypress/Cypress + Mocha" ci
 
       - name: Run Cypress (with Allure)
-        run: npm run cy:run
-        working-directory: "Cypress/Cypress + Mocha"
+        run: npm --prefix "Cypress/Cypress + Mocha" run cy:run
 
       - name: Upload allure-results (raw)
         if: always()
@@ -51,8 +49,7 @@ jobs:
 
       - name: Generate Allure report
         if: always()
-        run: npx allure generate --clean ./allure-results -o ./allure-report
-        working-directory: "Cypress/Cypress + Mocha"
+        run: npx --prefix "Cypress/Cypress + Mocha" allure generate --clean "Cypress/Cypress + Mocha/allure-results" -o "Cypress/Cypress + Mocha/allure-report"
 
       - name: Upload Allure HTML report
         if: always()
