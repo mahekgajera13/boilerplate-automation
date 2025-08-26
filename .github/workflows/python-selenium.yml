@@ -134,12 +134,17 @@ jobs:
       if: always()
       run: |
         cd Python
-        pip install allure-combine
+        # Install Allure command line tool
+        curl -o- -sSL https://repo.maven.apache.org/maven2/io/qameta/allure/allure-commandline/2.24.1/allure-commandline-2.24.1.tgz | tar -xz
+        export PATH=$PATH:$PWD/allure-2.24.1/bin
+        
         if [ -d "allure-results-${{ matrix.python-version }}" ]; then
-          allure-combine allure-results-${{ matrix.python-version }} allure-report-${{ matrix.python-version }} || echo "Allure combine failed, continuing..."
-          echo "Allure HTML report generated"
+          # Generate HTML report using Allure CLI
+          allure generate allure-results-${{ matrix.python-version }} --clean -o allure-report-${{ matrix.python-version }} || echo "Allure report generation failed, continuing..."
+          echo "Allure HTML report generated in allure-report-${{ matrix.python-version }}"
+          ls -la allure-report-${{ matrix.python-version }} || echo "No allure report directory found"
         else
-          echo "No allure results to combine"
+          echo "No allure results to generate report from"
         fi
     
     - name: Upload Allure HTML report
