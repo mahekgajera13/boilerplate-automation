@@ -1,0 +1,86 @@
+name: Python Selenium Tests
+
+on:
+  push:
+    branches: main
+
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        python-version: [3.9, 3.10, 3.11]
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y google-chrome-stable
+        sudo apt-get install -y xvfb
+    
+    - name: Cache pip dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+    
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    
+    - name: Start virtual display
+      run: |
+        Xvfb :99 -screen 0 1920x1080x24 > /dev/null 2>&1 &
+        echo "DISPLAY=:99" >> $GITHUB_ENV
+    
+    - name: Run tests with Behave
+      run: |
+        behave --format=pretty --outfile=test-results-${{ matrix.python-version }}.txt
+        behave --format=json --outfile=test-results-${{ matrix.python-version }}.json
+      env:
+        CI: true
+        DISPLAY: :99
+    
+    - name: Upload test results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: test-results-${{ matrix.python-version }}
+        path: |
+          test-results-${{ matrix.python-version }}.txt
+          test-results-${{ matrix.python-version }}.json
+    
+    - name: Generate Allure report
+      if: always()
+      run: |
+        pip install allure-behave
+        behave --format=allure_behave.formatter:AllureFormatter --outfile=allure-results-${{ matrix.python-version }}
+    
+    - name: Upload Allure results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: allure-results-${{ matrix.python-version }}
+        path: allure-results-${{ matrix.python-version }}
+    
+    - name: Test summary
+      if: always()
+      run: |
+        echo "Python ${{ matrix.python-version }} tests completed"
+        if [ -f "test-results-${{ matrix.python-version }}.txt" ]; then
+          echo "Test results:"
+          cat "test-results-${{ matrix.python-version }}.txt"
+        fi
