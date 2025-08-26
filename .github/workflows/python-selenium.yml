@@ -1,0 +1,166 @@
+name: Python Selenium Tests
+
+on:
+  push:
+    branches: [ main, master ]
+    paths:
+      - 'Python/**'
+  pull_request:
+    branches: [ main, master ]
+    paths:
+      - 'Python/**'
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        python-version: [3.11]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y wget unzip
+        sudo apt-get install -y xvfb
+    
+    - name: Install Chrome
+      run: |
+        wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+        echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
+        sudo apt-get update
+        sudo apt-get install -y google-chrome-stable
+    
+    - name: Cache pip dependencies
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('Python/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-${{ matrix.python-version }}-
+          ${{ runner.os }}-pip-
+    
+    - name: Install Python dependencies
+      run: |
+        cd Python
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install allure-behave
+    
+    - name: Start virtual display
+      run: |
+        Xvfb :99 -screen 0 1920x1080x24 > /dev/null 2>&1 &
+        echo "DISPLAY=:99" >> $GITHUB_ENV
+    
+    - name: List test files
+      run: |
+        cd Python
+        echo "Available test files:"
+        find . -name "*.feature" -type f
+        echo "Available step files:"
+        find . -name "*.py" -type f | grep -v __pycache__
+    
+    - name: Run all tests with Behave (Pretty format)
+      run: |
+        cd Python
+        behave --format=pretty --outfile=test-results-${{ matrix.python-version }}.txt --tags=~@skip || true
+      env:
+        CI: true
+        DISPLAY: :99
+        PYTHONPATH: ${{ github.workspace }}/Python
+    
+    - name: Run all tests with Behave (JSON format)
+      run: |
+        cd Python
+        behave --format=json --outfile=test-results-${{ matrix.python-version }}.json --tags=~@skip || true
+      env:
+        CI: true
+        DISPLAY: :99
+        PYTHONPATH: ${{ github.workspace }}/Python
+    
+    - name: Generate comprehensive Allure report
+      if: always()
+      run: |
+        cd Python
+        behave --format=allure_behave.formatter:AllureFormatter --outfile=allure-results-${{ matrix.python-version }} --tags=~@skip || true
+        echo "Allure results generated in: allure-results-${{ matrix.python-version }}"
+        ls -la allure-results-${{ matrix.python-version }} || echo "No allure results directory found"
+    
+    - name: Create test summary
+      if: always()
+      run: |
+        cd Python
+        echo "=== TEST EXECUTION SUMMARY ===" > test-summary-${{ matrix.python-version }}.txt
+        echo "Python Version: ${{ matrix.python-version }}" >> test-summary-${{ matrix.python-version }}.txt
+        echo "Execution Time: $(date)" >> test-summary-${{ matrix.python-version }}.txt
+        echo "Repository: ${{ github.repository }}" >> test-summary-${{ matrix.python-version }}.txt
+        echo "Commit: ${{ github.sha }}" >> test-summary-${{ matrix.python-version }}.txt
+        echo "" >> test-summary-${{ matrix.python-version }}.txt
+        if [ -f "test-results-${{ matrix.python-version }}.txt" ]; then
+          echo "Test Results:" >> test-summary-${{ matrix.python-version }}.txt
+          cat "test-results-${{ matrix.python-version }}.txt" >> test-summary-${{ matrix.python-version }}.txt
+        else
+          echo "No test results file found" >> test-summary-${{ matrix.python-version }}.txt
+        fi
+    
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: test-results-${{ matrix.python-version }}
+        path: |
+          Python/test-results-${{ matrix.python-version }}.txt
+          Python/test-results-${{ matrix.python-version }}.json
+          Python/test-summary-${{ matrix.python-version }}.txt
+    
+    - name: Upload Allure results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: allure-results-${{ matrix.python-version }}
+        path: Python/allure-results-${{ matrix.python-version }}
+    
+    - name: Generate and upload Allure HTML report
+      if: always()
+      run: |
+        cd Python
+        pip install allure-combine
+        if [ -d "allure-results-${{ matrix.python-version }}" ]; then
+          allure-combine allure-results-${{ matrix.python-version }} allure-report-${{ matrix.python-version }} || echo "Allure combine failed, continuing..."
+          echo "Allure HTML report generated"
+        else
+          echo "No allure results to combine"
+        fi
+    
+    - name: Upload Allure HTML report
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: allure-html-report-${{ matrix.python-version }}
+        path: Python/allure-report-${{ matrix.python-version }}
+    
+    - name: Final test summary
+      if: always()
+      run: |
+        echo "=== FINAL SUMMARY ==="
+        echo "Python ${{ matrix.python-version }} tests completed"
+        echo "Check artifacts for:"
+        echo "  - Test results (TXT/JSON)"
+        echo "  - Allure results (raw data)"
+        echo "  - Allure HTML report (viewable)"
+        echo "  - Test summary"
+        if [ -f "Python/test-results-${{ matrix.python-version }}.txt" ]; then
+          echo "Test results available in artifacts"
+        else
+          echo "No test results generated"
+        fi
