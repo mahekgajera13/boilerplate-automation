@@ -1,4 +1,4 @@
-name: Python Selenium Tests
+name: Behave Selenium Tests
 
 on:
   push:

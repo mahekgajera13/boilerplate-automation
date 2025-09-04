@@ -5,9 +5,23 @@
   "type": "module",
   "scripts": {
   "build": "tsc -p tsconfig.json",
-  "test": "mocha \"dist/test/**/*.spec.js\"",
   "allure:generate": "allure generate allure-results --clean -o allure-report",
-  "allure:open": "allure open allure-report"
+  "allure:open": "allure open allure-report",
+
+  "run": "npm run build && npm test",
+  "run:headed": "set HEADLESS=false&& npm run run",
+
+  "run:edge": "set BROWSER=edge&& set CHANNEL=msedge&& npm run run",
+  "run:edge:headed": "set HEADLESS=false&& set BROWSER=edge&& set CHANNEL=msedge&& npm run run",
+
+  "run:chrome": "set BROWSER=chromium&& set CHANNEL=chrome&& npm run run",
+  "run:chrome:headed": "set HEADLESS=false&& set BROWSER=chromium&& set CHANNEL=chrome&& npm run run",
+
+  "run:firefox": "set BROWSER=firefox&& npm run run",
+  "run:firefox:headed": "set HEADLESS=false&& set BROWSER=firefox&& npm run run",
+
+  "run:webkit": "set BROWSER=webkit&& npm run run",
+  "run:webkit:headed": "set HEADLESS=false&& set BROWSER=webkit&& npm run run"
 },
   "devDependencies": {
     "@types/chai": "^5.2.2",

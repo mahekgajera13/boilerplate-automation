@@ -1,0 +1,16 @@
+{
+  "name": "python-behave-runner",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Convenience npm scripts to run Behave cross-browser",
+  "scripts": {
+    "behave": "behave -f pretty",
+    "behave:chrome": "set BROWSER=chrome&& behave -f pretty",
+    "behave:firefox": "set BROWSER=firefox&& behave -f pretty",
+    "behave:edge": "set BROWSER=edge&& behave -f pretty",
+    "allure:generate": "allure generate ./reports --clean -o ./allure-report",
+    "allure:open": "allure open ./allure-report"
+  }
+}
+
+

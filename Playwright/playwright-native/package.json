@@ -6,7 +6,22 @@
     "test": "rimraf allure-results && playwright test",
     "test:headed": "rimraf allure-results && playwright test --headed",
     "allure:generate": "allure generate ./allure-results --clean -o ./allure-report",
-    "allure:open": "allure open ./allure-report"
+    "allure:open": "allure open ./allure-report",
+
+    "run": "npm run test",
+    "run:headed": "npm run test:headed",
+
+    "run:edge": "rimraf allure-results && set BROWSER=msedge&& playwright test",
+    "run:edge:headed": "rimraf allure-results && set BROWSER=msedge&& playwright test --headed",
+
+    "run:chrome": "rimraf allure-results && set BROWSER=chrome&& playwright test",
+    "run:chrome:headed": "rimraf allure-results && set BROWSER=chrome&& playwright test --headed",
+
+    "run:firefox": "rimraf allure-results && set BROWSER=firefox&& playwright test",
+    "run:firefox:headed": "rimraf allure-results && set BROWSER=firefox&& playwright test --headed",
+
+    "run:webkit": "rimraf allure-results && set BROWSER=webkit&& playwright test",
+    "run:webkit:headed": "rimraf allure-results && set BROWSER=webkit&& playwright test --headed"
   },
   "devDependencies": {
     "@playwright/test": "^1.47.0",

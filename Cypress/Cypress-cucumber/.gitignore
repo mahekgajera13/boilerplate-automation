@@ -28,6 +28,7 @@ coverage/
 cypress/videos/
 cypress/screenshots/
 cypress/downloads/
+.cypress-cache/
 
 # Allure artifacts
 allure-results/
@@ -41,3 +42,4 @@ allure-report/
 Thumbs.db
 *.swp
 .cache/
+

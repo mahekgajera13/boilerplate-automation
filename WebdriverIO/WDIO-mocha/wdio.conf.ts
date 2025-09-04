@@ -1,3 +1,23 @@
+const parseBrowsersFromEnv = (): Array<WebdriverIO.Capabilities> => {
+    const envValue = process.env.BROWSERS || process.env.BROWSER || 'chrome'
+    const browserList = envValue.split(',').map(b => b.trim().toLowerCase()).filter(Boolean)
+
+    const toCapability = (name: string): WebdriverIO.Capabilities => {
+        if (name === 'chrome' || name === 'chromium') {
+            return { browserName: 'chrome' }
+        }
+        if (name === 'firefox' || name === 'ff') {
+            return { browserName: 'firefox' }
+        }
+        if (name === 'edge' || name === 'msedge') {
+            return { browserName: 'MicrosoftEdge' }
+        }
+        return { browserName: 'chrome' }
+    }
+
+    return browserList.map(toCapability)
+}
+
 export const config: WebdriverIO.Config = {
     runner: 'local',
     tsConfigPath: './tsconfig.json',
@@ -11,9 +31,7 @@ export const config: WebdriverIO.Config = {
     ],
     maxInstances: 10,
   
-    capabilities: [{
-        browserName: 'chrome'
-    }],
+    capabilities: parseBrowsersFromEnv(),
 
     logLevel: 'info',
     bail: 0,

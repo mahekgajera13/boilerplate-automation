@@ -1,5 +1,45 @@
 import { defineConfig, devices } from '@playwright/test';
 
+const browser = process.env.BROWSER || 'chromium';
+
+function getBrowserConfig() {
+  switch (browser.toLowerCase()) {
+    case 'msedge':
+    case 'edge':
+      return {
+        name: 'edge',
+        use: { 
+          ...devices['Desktop Chrome'],
+          channel: 'msedge'
+        },
+      };
+    case 'chrome':
+      return {
+        name: 'chrome',
+        use: { 
+          ...devices['Desktop Chrome'],
+          channel: 'chrome'
+        },
+      };
+    case 'firefox':
+      return {
+        name: 'firefox',
+        use: { ...devices['Desktop Firefox'] },
+      };
+    case 'webkit':
+    case 'safari':
+      return {
+        name: 'webkit',
+        use: { ...devices['Desktop Safari'] },
+      };
+    default:
+      return {
+        name: 'chromium',
+        use: { ...devices['Desktop Chrome'] },
+      };
+  }
+}
+
 export default defineConfig({
   testDir: './tests',
   fullyParallel: false,
@@ -15,12 +55,7 @@ export default defineConfig({
     screenshot: 'only-on-failure',
     video: 'retain-on-failure'
   },
-  projects: [
-  {
-    name: 'chromium',
-    use: { ...devices['Desktop Chrome'] },
-  },
-],
+  projects: [getBrowserConfig()],
 
   outputDir: 'test-results/',
 });

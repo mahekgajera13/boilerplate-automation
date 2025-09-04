@@ -153,6 +153,7 @@ chromedriver.log
 selenium-debug.log
 
 # Test reports and artifacts
+allure-report/
 reports/
 allure-results/
 test-results*.txt

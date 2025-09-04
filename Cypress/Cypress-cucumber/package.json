@@ -3,9 +3,10 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "cy:open": "cypress open",
-    "cy:run": "cypress run",
-    "cy:run:allure": "cypress run --env allure=true,allureClearSkipped=true,allureAddVideoOnPass=false",
+    "postinstall": "SET CYPRESS_CACHE_FOLDER=./.cypress-cache&& npx cypress install --force",
+    "cy:open": "SET CYPRESS_CACHE_FOLDER=./.cypress-cache&& cypress open",
+    "cy:run": "SET CYPRESS_CACHE_FOLDER=./.cypress-cache&& cypress run",
+    "cy:run:allure": "SET CYPRESS_CACHE_FOLDER=./.cypress-cache&& cypress run --env allure=true,allureClearSkipped=true,allureAddVideoOnPass=false",
     "allure:clean": "rimraf allure-results allure-report || true",
     "allure:generate": "allure generate --clean ./allure-results -o ./allure-report",
     "allure:open": "allure open ./allure-report"

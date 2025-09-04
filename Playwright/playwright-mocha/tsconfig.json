@@ -24,7 +24,7 @@
   "include": [
     "test/**/*.ts",
     "**/*.ts"
-  ],
+, "dist/test/test.spec.js"  ],
   "exclude": [
     "node_modules",
     "dist"
