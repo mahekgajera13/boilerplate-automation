@@ -1,0 +1,77 @@
+name: Selenium WebDriver (manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      browser:
+        description: "Choose browser (chrome, firefox, edge)"
+        required: false
+        default: "chrome"
+        type: choice
+        options:
+          - chrome
+          - firefox
+          - edge
+      test_file:
+        description: "Choose which tests to run"
+        required: false
+        default: "tests"
+        type: choice
+        options:
+          - tests
+          - tests/test_google.py
+
+jobs:
+  run-tests:
+    runs-on: windows-latest
+
+    defaults:
+      run:
+        shell: pwsh
+        working-directory: selenium-webdriver
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest selenium allure-pytest
+
+      - name: Show versions
+        run: |
+          python --version
+          pip --version
+          python -c "import selenium,sys;print('selenium', selenium.__version__)"
+
+      - name: Run pytest
+        env:
+          CHOSEN_BROWSER: ${{ github.event.inputs.browser }}
+        run: |
+          $testInput = "${{ github.event.inputs.test_file }}"
+          if (-not $testInput -or $testInput -eq 'tests') { $testArg = 'tests' } else { $testArg = $testInput }
+          Write-Host "Browser: $env:CHOSEN_BROWSER"
+          Write-Host "Tests: $testArg"
+          pytest -s -q $testArg --browser $env:CHOSEN_BROWSER --alluredir=allure-results
+
+      - name: Upload Allure results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-results-selenium-webdriver
+          path: selenium-webdriver/allure-results
+          if-no-files-found: warn
+
+      - name: Upload Pytest cache (optional)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pytest-cache-selenium-webdriver
+          path: selenium-webdriver/.pytest_cache
+          if-no-files-found: ignore
