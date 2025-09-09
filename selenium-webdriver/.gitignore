@@ -1,0 +1,41 @@
+# Python cache and bytecode
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Distribution / packaging
+*.egg-info/
+*.egg
+build/
+dist/
+
+# Virtual environments
+venv/
+.venv/
+env/
+.env/
+
+# Test & Allure outputs
+.allure/
+allure-results/
+allure-report/
+reports/
+.pytest_cache/
+*.log
+
+# IDE / editor
+.idea/
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+# Created by venv; see https://docs.python.org/3/library/venv.html
+venv
+./__pychache__
+allure-results
+.pytest_cache
+
+
