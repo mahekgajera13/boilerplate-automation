@@ -1,6 +1,8 @@
 name: Selenium WebDriver (manual)
 
 on:
+  push:
+    branches: [ main ]
   workflow_dispatch:
     inputs:
       browser:
@@ -54,6 +56,7 @@ jobs:
         env:
           CHOSEN_BROWSER: ${{ github.event.inputs.browser }}
         run: |
+          if (-not $env:CHOSEN_BROWSER) { $env:CHOSEN_BROWSER = 'chrome' }
           $testInput = "${{ github.event.inputs.test_file }}"
           if (-not $testInput -or $testInput -eq 'tests') { $testArg = 'tests' } else { $testArg = $testInput }
           Write-Host "Browser: $env:CHOSEN_BROWSER"
