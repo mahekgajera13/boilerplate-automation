@@ -1,0 +1,88 @@
+name: Pytest Selenium 
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      browser:
+        description: "Choose browser (chrome, firefox, edge)"
+        required: false
+        default: "chrome"
+        type: choice
+        options:
+          - chrome
+          - firefox
+          - edge
+      test_file:
+        description: "Choose which tests to run"
+        required: false
+        default: "tests"
+        type: choice
+        options:
+          - tests
+          - tests/test_google.py
+
+jobs:
+  run-tests:
+    runs-on: windows-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chrome, firefox, edge]
+
+    defaults:
+      run:
+        shell: pwsh
+        working-directory: pytest-selenium
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Show versions
+        run: |
+          python --version
+          pip --version
+          python -c "import selenium,sys;print('selenium', selenium.__version__)"
+
+      - name: Run pytest (${{ matrix.browser }})
+        run: |
+          $testInput = "${{ github.event.inputs.test_file }}"
+          if (-not $testInput -or $testInput -eq 'tests') { $testArg = 'tests' } else { $testArg = $testInput }
+          Write-Host "Browser (matrix): ${{ matrix.browser }}"
+          Write-Host "Tests: $testArg"
+          pytest -s -q $testArg --browser ${{ matrix.browser }}
+
+      - name: Upload Allure results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-results-pytest-selenium-${{ matrix.browser }}
+          path: pytest-selenium/allure-results
+          if-no-files-found: warn
+
+      - name: Generate Allure HTML report
+        if: always()
+        run: |
+          npm install -g allure-commandline --no-audit --no-fund --quiet
+          allure generate allure-results -o allure-report --clean
+
+      - name: Upload Allure HTML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-report-pytest-selenium-${{ matrix.browser }}
+          path: pytest-selenium/allure-report
+          if-no-files-found: warn
